@@ -5,7 +5,7 @@ import { Request } from '../types.ts';
 const API_BASE_URL = 'https://your-n8n-instance.com/webhook'; // Replace with your n8n webhook URL
 
 export const fetchRequests = async (): Promise<Request[]> => {
-  const response = await axios.get('https://n8n.rehbock.xyz/webhook-test/get-all'); // Update with your actual endpoint
+  const response = await axios.get('https://n8n.rehbock.xyz/webhook/get-pending'); // Update with your actual endpoint
   return response.data;
 };
 
@@ -16,9 +16,9 @@ export const fetchPendingRequests = async (): Promise<Request[]> => {
 };
 
 export const confirmRequest = async (id: string, days: number) => {
-  return axios.post(`https://n8n.rehbock.xyz/webhook-test/confirm-request`, { id, days });
+  return axios.post(`https://n8n.rehbock.xyz/webhook/confirm-request`, { id, days});
 };
 
 export const denyRequest = async (id: string, reason: string) => {
-  return axios.post(`${API_BASE_URL}/deny-request`, { id, reason });
+  return axios.post(`https://n8n.rehbock.xyz/webhook/deny-request`, { id, reason });
 };

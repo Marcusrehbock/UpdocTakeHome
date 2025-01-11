@@ -1,13 +1,14 @@
 // src/components/ConfirmDenyModal.tsx
 import React, { useState } from 'react';
-import { Modal, Box, Typography, TextField, Button } from '@mui/material';
-import { confirmRequest, denyRequest } from '../services/api.ts';
+import { Modal, Box, Typography, TextField, Button, CircularProgress, Alert } from '@mui/material';
+import { denyRequest } from '../services/api.ts';
 
 interface Props {
   open: boolean;
   type: 'confirm' | 'deny';
   onClose: () => void;
   requestId: string;
+  onDenySuccess: (message: string) => void;
 }
 
 const style = {
@@ -15,49 +16,80 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 300,
+  width: 400,
   bgcolor: 'background.paper',
   boxShadow: 24,
   p: 4,
 };
 
-const ConfirmDenyModal: React.FC<Props> = ({ open, type, onClose, requestId }) => {
-  const [input, setInput] = useState('');
+const ConfirmDenyModal: React.FC<Props> = ({ open, type, onClose, requestId, onDenySuccess }) => {
+  const [input, setInput] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
+    if (type === 'deny' && input.trim() === '') {
+      setError('Please provide a reason for denial.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
     try {
-      if (type === 'confirm') {
-        const days = parseInt(input, 10);
-        await confirmRequest(requestId, days);
-        // Optionally, trigger PDF generation and email sending via n8n
-      } else {
-        await denyRequest(requestId, input);
+      if (type === 'deny') {
+        await denyRequest(requestId, input.trim());
+        onDenySuccess('Request denied and email sent to the patient.');
       }
-      onClose();
-      // Optionally, refresh the requests list
+      // Future: Handle 'confirm' type if needed
     } catch (error) {
       console.error(error);
-      // Handle error (e.g., show notification)
+      setError('Failed to process the request.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!loading) {
+      setInput('');
+      setError(null);
+      onClose();
     }
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleClose} aria-labelledby="confirm-deny-modal" aria-describedby="confirm-deny-description">
       <Box sx={style}>
-        <Typography variant="h6" component="h2">
-          {type === 'confirm' ? 'Confirm Request' : 'Deny Request'}
+        <Typography id="confirm-deny-modal" variant="h6" component="h2" gutterBottom>
+          {type === 'deny' ? 'Deny Request' : 'Confirm Request'}
         </Typography>
-        <TextField
-          fullWidth
-          label={type === 'confirm' ? 'Number of Days' : 'Reason for Denial'}
-          variant="outlined"
-          margin="normal"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
-          Submit
-        </Button>
+        {type === 'deny' && (
+          <>
+            <TextField
+              label="Reason for Denial"
+              multiline
+              rows={4}
+              variant="outlined"
+              fullWidth
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              disabled={loading}
+            />
+            {error && (
+              <Box mt={2}>
+                <Alert severity="error">{error}</Alert>
+              </Box>
+            )}
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <Button onClick={handleClose} disabled={loading} sx={{ mr: 2 }}>
+                Cancel
+              </Button>
+              <Button variant="contained" color="error" onClick={handleSubmit} disabled={loading}>
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Deny'}
+              </Button>
+            </Box>
+          </>
+        )}
       </Box>
     </Modal>
   );
