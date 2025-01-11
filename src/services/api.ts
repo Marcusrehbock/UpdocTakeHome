@@ -16,7 +16,7 @@ export const fetchPendingRequests = async (): Promise<Request[]> => {
 };
 
 export const confirmRequest = async (id: string, days: number) => {
-  return axios.post(`${API_BASE_URL}/confirm-request`, { id, days });
+  return axios.post(`https://n8n.rehbock.xyz/webhook-test/confirm-request`, { id, days });
 };
 
 export const denyRequest = async (id: string, reason: string) => {
