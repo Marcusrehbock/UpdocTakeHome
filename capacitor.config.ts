@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'xyz.rehbock.updoc',
-  appName: 'Updoc Doctor Portal',
+  appName: 'updoc-doctors-portal',
   webDir: 'build'
 };
 

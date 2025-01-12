@@ -1,6 +1,6 @@
 // src/App.tsx
 import React, { useEffect, useState } from 'react';
-import { Container, Grid, CircularProgress, Button, Box, Snackbar, Alert, Typography } from '@mui/material';
+import { Container, CircularProgress, Button, Box, Snackbar, Alert, Typography, Grid } from '@mui/material';
 import { fetchRequests, fetchPendingRequests } from './services/api.ts';
 import { Request } from './types.ts';
 import RequestList from './components/RequestList.tsx';
@@ -13,7 +13,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Initial fetch to load all requests (optional)
+  // Initial fetch to load all requests
   useEffect(() => {
     const loadAllRequests = async () => {
       setLoading(true);
@@ -49,7 +49,7 @@ const App: React.FC = () => {
     }
   };
 
-  // Handler to fetch all requests (optional, if you want to switch back)
+  // Handler to fetch all requests
   const handleGetAllRequests = async () => {
     setLoading(true);
     setError(null);
@@ -66,7 +66,7 @@ const App: React.FC = () => {
     }
   };
 
-  // Handler to remove a request from the list after confirmation or denial
+  // Handler to remove a request from the list
   const handleRemoveRequest = (id: string) => {
     setRequests((prevRequests) => prevRequests.filter((req) => req.id !== id));
     setSelectedRequest((prevSelected) => {
@@ -104,25 +104,24 @@ const App: React.FC = () => {
         <Button variant="contained" color="primary" onClick={handleGetPendingRequests} sx={{ mr: 2, mb: { xs: 1, sm: 0 } }}>
           Get Pending Requests
         </Button>
-        {/* Optional: Button to fetch all requests */}
-        {/* <Button variant="outlined" color="secondary" onClick={handleGetAllRequests}>
-          Get All Requests
-        </Button> */}
       </Box>
       {error && (
         <Box mb={2}>
           <Alert severity="error">{error}</Alert>
         </Box>
       )}
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={3}>
+      <Grid container spacing={2} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+        {/* Left side - Request List */}
+        <Grid item xs={12} sm={4} md={3} sx={{ position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}>
           {requests.length > 0 ? (
             <RequestList requests={requests} onSelect={setSelectedRequest} />
           ) : (
             <Typography variant="body1">No pending requests available.</Typography>
           )}
         </Grid>
-        <Grid item xs={12} md={9}>
+        
+        {/* Right side - Request Details */}
+        <Grid item xs={12} sm={8} md={9} sx={{ overflowY: 'auto' }}>
           {selectedRequest ? (
             <RequestDetails
               request={selectedRequest}
